@@ -189,8 +189,9 @@ export const sandboxHarnessMiddleware = (
     return;
   }
 
-  const scenario =
-    (state.activeScenario && state.scenarios[state.activeScenario]) ?? undefined;
+  const scenario = state.activeScenario
+    ? state.scenarios[state.activeScenario]
+    : undefined;
   const rule = findMatchingRule(req.path, scenario);
 
   if (!rule) {
