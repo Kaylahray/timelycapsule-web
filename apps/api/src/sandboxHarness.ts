@@ -104,7 +104,7 @@ const findMatchingRule = (path: string, scenario: Scenario | undefined): Endpoin
   return null;
 };
 
-const logInjection = (mode: FailureMode, req: Request): void => {
+const logInjection = (mode: FailureMode): void => {
   state.stats.totalInjected += 1;
   state.stats.perMode[mode] += 1;
 };
@@ -118,7 +118,7 @@ const maybeInjectFailure = (
   switch (mode) {
     case 'latency-spike': {
       setTimeout(() => {
-        logInjection(mode, req);
+        logInjection(mode);
         next();
       }, defaultLatencyMs);
       return;
@@ -128,7 +128,7 @@ const maybeInjectFailure = (
         next();
         return;
       }
-      logInjection(mode, req);
+      logInjection(mode);
       res.status(500).json({
         error: 'Injected failure: random-500',
         mode,
@@ -142,19 +142,20 @@ const maybeInjectFailure = (
         next();
         return;
       }
-      logInjection(mode, req);
+      logInjection(mode);
       setTimeout(() => {
         if (!res.headersSent) {
           try {
             res.end();
           } catch {
+            void 0;
           }
         }
       }, timeoutHoldMs);
       return;
     }
     case 'dropped-response': {
-      logInjection(mode, req);
+      logInjection(mode);
       const socket = req.socket;
       if (!socket.destroyed) {
         socket.destroy();
@@ -166,7 +167,7 @@ const maybeInjectFailure = (
         next();
         return;
       }
-      logInjection(mode, req);
+      logInjection(mode);
       res.status(200).type('application/json').send('{"injected": true,'); // invalid JSON
       return;
     }
